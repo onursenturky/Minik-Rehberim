@@ -2,7 +2,6 @@
 
 Minik Rehberim, Fatih ilçesindeki anaokullarını interaktif bir harita üzerinde gösteren ve ailelere en uygun anaokulu önerileri sunan bir web uygulamasıdır.
 
-![Minik Rehberim Screenshot](screenshot.png)
 
 ## 🌟 Özellikler
 
@@ -23,11 +22,11 @@ Minik Rehberim, Fatih ilçesindeki anaokullarını interaktif bir harita üzerin
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5&logoColor=white)
-- ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3&logoColor=white)
-- ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-- ![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=flat&logo=bootstrap&logoColor=white)
-- ![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat&logo=leaflet&logoColor=white)
+- ![HTML5]
+- ![CSS3]
+- ![JavaScript]
+- ![Bootstrap]
+- ![Leaflet]
 
 ## 🚀 Nasıl Kullanılır?
 
@@ -51,13 +50,7 @@ Minik Rehberim, Fatih ilçesindeki anaokullarını interaktif bir harita üzerin
 - [ ] Çoklu dil desteği
 - [ ] Anaokulu karşılaştırma özelliği
 
-## 👥 Katkıda Bulunma
 
-1. Bu repo'yu fork edin
-2. Feature branch oluşturun (`git checkout -b feature/YeniOzellik`)
-3. Değişikliklerinizi commit edin (`git commit -m 'Yeni özellik: Detay'`)
-4. Branch'inizi push edin (`git push origin feature/YeniOzellik`)
-5. Pull Request oluşturun
 
 ## 📝 Lisans
 
