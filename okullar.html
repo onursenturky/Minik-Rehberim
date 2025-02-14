@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Okullar - Minik Rehberim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"/>
+    <script src="data.js"></script>
+    
+    <style>
+        :root {
+            --turuncu: #ff8c00;
+            --acik-turuncu: #ffa239;
+            --beyaz: #FFF8F0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--beyaz);
+            padding-top: 80px;
+        }
+
+        .navbar {
+            background-color: var(--acik-turuncu) !important;
+            box-shadow: 0 2px 10px rgba(9, 9, 9, 0.1);
+            height: 50px;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Lobster', cursive;
+            font-size: 1.6rem;
+            color: var(--beyaz) !important;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .nav-link {
+            color: var(--beyaz) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            transform: scale(1.1);
+        }
+
+        .school-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .school-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .school-card.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .score-badge {
+            background: var(--turuncu);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .maps-button {
+            background: var(--turuncu);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .maps-button:hover {
+            background: var(--acik-turuncu);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .sort-button, .filter-btn {
+            background: white;
+            border: 2px solid var(--turuncu);
+            color: var(--turuncu);
+            padding: 8px 20px;
+            border-radius: 25px;
+            margin: 5px;
+            cursor: pointer;
+            font-family: var(--font-poppins);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .sort-button:hover, .filter-btn:hover {
+            background: var(--turuncu);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(255, 140, 0, 0.2);
+        }
+
+        .sort-button.active, .filter-btn.active {
+            background: var(--turuncu);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .sort-button, .filter-btn {
+                padding: 6px 15px;
+                font-size: 0.9rem;
+            }
+
+            .navbar {
+                height: auto;
+            }
+            
+            .navbar-brand {
+                font-size: 1.4rem;
+                font-family: 'Lobster', cursive;
+                position: relative;
+                left: 0;
+                transform: none;
+            }
+        }
+
+        h1 {
+            font-family: 'Lobster', cursive;
+            color: var(--turuncu);
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-btn {
+            background: white;
+            border: 1px solid var(--turuncu);
+            color: var(--turuncu);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--turuncu);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        .form-control {
+            height: 36px;
+            font-size: 0.9rem;
+        }
+
+        .btn-custom {
+            height: 36px;
+            padding: 0 20px;
+            font-size: 0.9rem;
+            line-height: 36px;
+        }
+
+        .filter-bar {
+            position: relative;
+            margin: 20px auto;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            background: white !important;
+            border-radius: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.1);
+            width: fit-content;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            padding: 0 4px;
+        }
+
+        .filter-btn {
+            background: white;
+            color: #5f6368 !important;
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: var(--turuncu) !important;
+            color: white !important;
+            border-color: transparent;
+            box-shadow: 0 2px 6px rgba(255, 140, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                margin: 15px 10px;
+                padding: 6px;
+            }
+            
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+
+        /* Separator için stil */
+        .separator {
+            width: 1px;
+            height: 24px;
+            background: rgba(0,0,0,0.1);
+            margin: 0 8px;
+        }
+
+        /* Sort butonları için özel stil */
+        .sort-btn {
+            background: var(--turuncu);
+            color: white !important;
+            border: none;
+        }
+
+        .sort-btn:hover {
+            background: var(--acik-turuncu);
+            color: white !important;
+        }
+
+        .sort-btn.active {
+            background: var(--turuncu) !important;
+            color: white !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .separator {
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Minik Rehberim</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"></a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="text-center mb-4" style="
+            color: var(--turuncu); 
+            font-size: 2.5rem;  /* Font boyutunu büyüttük */
+            margin-top: 40px;   /* Üstten boşluk ekledik */
+            font-family: 'Lobster', cursive;  /* Lobster fontunu ekledik */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);  /* Hafif gölge ekledik */
+        ">
+            Fatih'teki Anaokulları
+        </h1>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-buttons">
+                <button class="filter-btn sort-btn active" onclick="sortSchools('score')">⭐ Puana Göre</button>
+                <button class="filter-btn sort-btn" onclick="sortSchools('name')">📝 İsme Göre</button>
+                <div class="separator"></div>
+                <button class="filter-btn" data-filter="hijyen">🧼 Hijyen</button>
+                <button class="filter-btn" data-filter="egitim">🏫 Eğitim</button>
+                <button class="filter-btn" data-filter="ozel">♿ Özel Gereksinim</button>
+                <button class="filter-btn" data-filter="tamgun">⏰ Tam Gün</button>
+                <button class="filter-btn" data-filter="guvenlik">🔒 Güvenlik</button>
+            </div>
+        </div>
+
+        <!-- Schools List -->
+        <div class="row" id="schoolsList">
+            <!-- Schools will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        // Sıralama durumunu takip etmek için global değişkenler
+        let isNameAsc = true;  // İsim sıralaması için
+        let isScoreDesc = true; // Puan sıralaması için
+
+        // Okulları sıralama fonksiyonu
+        function sortSchools(criteria) {
+            // Okulları kopyala
+            let sortedSchools = [...kindergartens];
+            
+            // Butonların aktif durumunu güncelle
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (criteria === 'name') {
+                // İsme göre sırala
+                sortedSchools.sort((a, b) => {
+                    // Türkçe karakter desteği ile alfabetik sıralama
+                    const nameA = a.name.toLocaleLowerCase('tr');
+                    const nameB = b.name.toLocaleLowerCase('tr');
+                    
+                    if (isNameAsc) {
+                        return nameA.localeCompare(nameB, 'tr'); // A'dan Z'ye
+                    } else {
+                        return nameB.localeCompare(nameA, 'tr'); // Z'den A'ya
+                    }
+                });
+                isNameAsc = !isNameAsc; // Yönü değiştir
+            } else {
+                // Puana göre sırala
+                if (isScoreDesc) {
+                    // Yüksekten düşüğe
+                    sortedSchools.sort((a, b) => b.generalScore - a.generalScore);
+                } else {
+                    // Düşükten yükseğe
+                    sortedSchools.sort((a, b) => a.generalScore - b.generalScore);
+                }
+                isScoreDesc = !isScoreDesc; // Yönü değiştir
+            }
+
+            // Sıralanmış okulları göster
+            displaySchools(sortedSchools);
+        }
+
+        // Okulları görüntüleme fonksiyonu
+        function displaySchools(schools) {
+            const container = document.getElementById('schoolsList');
+            container.innerHTML = schools.map(school => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="school-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">${school.name}</h5>
+                            <span class="score-badge">${school.generalScore}</span>
+                        </div>
+                        ${getWarningMessage(school.name)}
+                        <div class="school-details">
+                            <div class="detail-row">
+                                <span>👩‍🏫 Öğretmen</span>
+                                <strong>${school.teacherQuality}/5</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>🧼 Hijyen</span>
+                                <strong>${school.hygiene}/5</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>🔒 Güvenlik</span>
+                                <strong>${school.security}/5</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>⏰ Çalışma</span>
+                                <strong>${school.schedule}</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>♿ Özel Gereksinim</span>
+                                <strong>${school.specialNeeds}</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>📞 Telefon</span>
+                                <strong>${school.phone}</strong>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="${school.address}" target="_blank" class="maps-button">
+                                Google Haritalar'da Görüntüle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Uyarı mesajı fonksiyonu
+        function getWarningMessage(schoolName) {
+            const warningSchools = [
+                "Akasya Gece ve Gündüz Bakımevi",
+                "Miraç Çocuk Anaokulu"
+            ];
+
+            if (warningSchools.includes(schoolName)) {
+                return `
+                    <div class="warning-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Çocuklara şiddet uygulandığı ile ilgili yorumlar bulunmaktadır.
+                    </div>
+                `;
+            }
+            return '';
+        }
+
+        function filterSchools(criteria) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            const clickedButton = event.target;
+            
+            // Toggle active state
+            if (clickedButton.classList.contains('active')) {
+                clickedButton.classList.remove('active');
+                displaySchools(kindergartens.sort((a, b) => b.generalScore - a.generalScore)); // Show all schools sorted by score
+                return;
+            }
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            clickedButton.classList.add('active');
+
+            const filteredSchools = kindergartens.filter(school => {
+                switch(criteria) {
+                    case 'hijyen':
+                        return school.hygiene >= 4;
+                    case 'egitim':
+                        return school.teacherQuality >= 4;
+                    case 'ozel':
+                        return school.specialNeeds === "Uygun";
+                    case 'tamgun':
+                        return school.schedule.includes("Tam Gün");
+                    case 'guvenlik':
+                        return school.security >= 4;
+                    default:
+                        return true;
+                }
+            }).sort((a, b) => {
+                // Her kategoride kendi puanına göre sırala
+                switch(criteria) {
+                    case 'hijyen':
+                        return b.hygiene - a.hygiene;
+                    case 'egitim':
+                        return b.teacherQuality - a.teacherQuality;
+                    case 'guvenlik':
+                        return b.security - a.security;
+                    default:
+                        return b.generalScore - a.generalScore;
+                }
+            });
+
+            displaySchools(filteredSchools);
+        }
+
+        // Event listeners ekle
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                filterSchools(e.target.dataset.filter);
+            });
+        });
+
+        // Sayfa yüklendiğinde varsayılan sıralamayı uygula
+        document.addEventListener('DOMContentLoaded', () => {
+            // Başlangıçta puana göre sırala (yüksekten düşüğe)
+            const sortedSchools = [...kindergartens].sort((a, b) => b.generalScore - a.generalScore);
+            displaySchools(sortedSchools);
+            // Puan sıralama butonunu aktif yap
+            document.querySelector('[onclick="sortSchools(\'score\')"]').classList.add('active');
+        });
+    </script>
+</body>
+</html>

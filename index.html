@@ -6,20 +6,26 @@
   <title>Minik Rehberim</title>
   
   <!-- Fontlar -->
-  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+  <!-- Data JS -->
+  <script src="data.js"></script>
 
   <style>
     /* Özel Stiller */
     :root {
-      --turuncu: #ff8c00;
+      --turuncu: #FFA500;
       --acik-turuncu: #ffa239;
       --beyaz: #FFF8F0;
+      --font-lobster: 'Lobster', cursive;
+      --font-poppins: 'Poppins', sans-serif;
     }
 
     body {
-      font-family: 'Roboto', sans-serif;
+      font-family: var(--font-poppins);
       background-color: var(--beyaz);
     }
     .container{
@@ -29,17 +35,23 @@
     .navbar {
       background-color: var(--acik-turuncu) !important;
       box-shadow: 0 2px 10px rgba(9, 9, 9, 0.1);
+      height: 50px;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     .navbar-brand {
       font-family: 'Lobster', cursive;
-      font-size: 2rem;
+      font-size: 1.6rem;
       color: var(--beyaz) !important;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
       position: absolute;
       left: 20px;
       top: 50%;
       transform: translateY(-50%);
+      margin: 0;
+      padding: 0;
+      line-height: 1;
     }
 
     .nav-link {
@@ -51,12 +63,11 @@
 
     .nav-link:hover {
       transform: scale(1.1);
-      color: var(--acik-turuncu) !important;
     }
 
     #map {
       height: calc(100vh - 60px);
-      margin-top: 62px;
+      margin-top: 50px;
     }
 
     .leaflet-popup-content {
@@ -86,9 +97,9 @@
     }
 
     .form-control {
-      border-radius: 25px;
-      border: 2px solid var(--acik-turuncu);
+      height: 32px;
       font-size: 0.9rem;
+      margin-top: 4px;
     }
 
     .filter-btn {
@@ -100,6 +111,8 @@
       transition: all 0.3s ease;
       white-space: nowrap;
       font-size: 0.9rem;
+      font-family: var(--font-poppins);
+      font-weight: 500;
     }
 
     .filter-btn:hover {
@@ -118,24 +131,30 @@
     .filter-bar {
       position: fixed;
       top: 70px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 65px;
       z-index: 1000;
       display: flex;
       gap: 8px;
       padding: 8px;
-      background: transparent !important;
-      backdrop-filter: blur(6px);
+      background: rgba(255, 255, 255, 0.7) !important;
+      backdrop-filter: blur(8px);
       border-radius: 24px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border: 1px solid rgba(0,0,0,0.1);
-      max-width: 90%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: auto;
       overflow-x: auto;
-      left: 390px;
+      white-space: nowrap;
+    }
+
+    .filter-buttons {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      padding: 0 4px;
     }
 
     .filter-btn {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.5);
       color: #5f6368 !important;
       border: 1px solid rgba(0,0,0,0.1);
       padding: 8px 16px;
@@ -146,10 +165,11 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
+      backdrop-filter: blur(4px);
     }
 
     .filter-btn:hover {
-      background: rgba(255, 255, 255, 1);
+      background: rgba(255, 255, 255, 0.8);
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transform: translateY(-1px);
     }
@@ -160,6 +180,288 @@
       border-color: transparent;
       box-shadow: 0 2px 6px rgba(255, 140, 0, 0.2);
     }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+        transition: right 0.3s ease;
+        overflow-y: auto;
+        padding-top: 70px;
+    }
+
+    .sidebar.active {
+        right: 0;
+    }
+
+    .sidebar-content {
+        padding: 25px;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 70px; 
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--turuncu);
+        font-family: var(--font-lobster);
+    }
+
+    .school-title {
+        font-family: var(--font-lobster);
+        color: var(--turuncu);
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+        letter-spacing: 1px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+    }
+
+    .detail-row:hover {
+        background: #fff8f0;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 8px;
+    }
+
+    .detail-row span {
+        font-family: var(--font-poppins);
+        color: #666;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+    }
+
+    .detail-row strong {
+        font-family: var(--font-poppins);
+        color: #333;
+        font-weight: 600;
+        background: #fff4e6;
+        padding: 4px 12px;
+        border-radius: 15px;
+    }
+
+    .maps-button {
+        font-family: var(--font-lobster);
+        background: var(--turuncu);
+        color: white !important;
+        text-decoration: none;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 25px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2);
+        cursor: pointer;
+    }
+
+    .maps-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3);
+        color: white !important;
+        text-decoration: none;
+    }
+
+    .review-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .review-title {
+        font-family: var(--font-lobster);
+        color: #333;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+    }
+
+    .rating-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .stars {
+        display: flex;
+        gap: 5px;
+    }
+
+    .stars i {
+        color: #ddd;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+    }
+
+    .stars i.active {
+        color: #ffd700;
+    }
+
+    .stars i:hover {
+        transform: scale(1.2);
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 12px;
+        border: 2px solid #f0f0f0;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        font-family: var(--font-poppins);
+        resize: vertical;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    textarea:focus {
+        border-color: var(--turuncu);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
+    }
+
+    .submit-review {
+        font-family: var(--font-lobster);
+        background: var(--turuncu);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .submit-review:hover {
+        background: #ff9100;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2);
+    }
+
+    @media (max-width: 480px) {
+        .sidebar {
+            width: 100%;
+            right: -100%;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+        
+        .detail-row strong {
+            align-self: flex-end;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .filter-bar {
+            left: 100px;
+            padding: 6px;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .navbar {
+            height: auto;
+        }
+        
+        .navbar-brand {
+            font-size: 1.4rem;
+            font-family: 'Lobster', cursive;
+            position: relative;
+            left: 0;
+            transform: none;
+        }
+    }
+
+    .marker-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .marker-background {
+        background: white;
+        border-radius: 15px;
+        padding: 4px 12px;    /* Yatay padding artırıldı */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: row;  /* Yatay hizalama */
+        align-items: center;
+        justify-content: center;
+        gap: 4px;            /* İkon ve metin arası boşluk */
+        height: 24px;
+        transition: all 0.3s ease;
+    }
+    
+    .marker-icon {
+        font-size: 14px;
+        line-height: 1;
+    }
+    
+    .marker-text {
+        font-size: 12px;
+        font-weight: bold;
+        color: #FFA500;
+    }
+
+    .marker-background:hover {
+        transform: scale(1.1);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+    }
+
+    .warning-message {
+        background-color: #fff3cd;
+        color: #856404;
+        padding: 12px;
+        margin: 0 0 15px 0;
+        border-radius: 8px;
+        border: 1px solid #ffeeba;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .warning-message i {
+        color: #856404;
+        font-size: 1.1rem;
+    }
   </style>
 </head>
 
@@ -167,24 +469,24 @@
   <!-- Navigasyon -->
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="#">Minik Rehberim</a>
+      <a class="navbar-brand" href="javascript:void(0);" onclick="window.location.reload();">Minik Rehberim</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link active" href="#">Ana Sayfa</a>
+            <a class="nav-link active" href="#"></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Okullar</a>
+            <a class="nav-link" href="okullar.html">Okullar</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">İletişim</a>
+            <a class="nav-link" href="#"></a>
           </li>
         </ul>
         <form class="d-flex ms-3" onsubmit="event.preventDefault(); findBestKindergarten();">
-          <input class="form-control me-2" id="addressInput" type="search" placeholder="Adres Ara...">
+          <input class="form-control me-2" id="addressInput" type="search" placeholder="Mahalle Ara...">
           <button class="btn btn-custom" type="submit">Ara</button>
         </form>
       </div>
@@ -193,11 +495,38 @@
 
   <div id="map"></div>
   <div class="filter-bar">
-    <button class="filter-btn" data-filter="hijyen">🧼 Hijyen</button>
-    <button class="filter-btn" data-filter="egitim">👩🏫 Eğitim</button>
-    <button class="filter-btn" data-filter="trafik">🚦 Trafik</button>
-    <button class="filter-btn" data-filter="ozel">♿ Özel Gereksinim</button>
-    <button class="filter-btn" data-filter="yarimgun">⏳ Çalışma Saatleri</button>
+    <div class="container">
+        <div class="filter-buttons">
+            <button class="filter-btn" data-filter="tamgun">⏰ Tam Gün</button>
+            <button class="filter-btn" data-filter="yarimgun">⌛ Yarım Gün</button>
+            <button class="filter-btn" data-filter="hijyen">🧼 Hijyen</button>
+            <button class="filter-btn" data-filter="guvenlik">🔒 Güvenlik</button>
+            <button class="filter-btn" data-filter="egitim">👩‍🏫 Eğitim</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- Önce sidebar HTML'ini ekleyin (body içine) -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-content">
+        <button class="close-btn" onclick="closeSidebar()">&times;</button>
+        <div id="school-details"></div>
+        <div class="review-section">
+            <h4 class="review-title">Yorum Ekle</h4>
+            <div class="rating-container">
+                <span>Puanınız:</span>
+                <div class="stars">
+                    <i class="fas fa-star" data-rating="1"></i>
+                    <i class="fas fa-star" data-rating="2"></i>
+                    <i class="fas fa-star" data-rating="3"></i>
+                    <i class="fas fa-star" data-rating="4"></i>
+                    <i class="fas fa-star" data-rating="5"></i>
+                </div>
+            </div>
+            <textarea id="reviewText" placeholder="Deneyiminizi paylaşın..."></textarea>
+            <button class="submit-review">Gönder</button>
+        </div>
+    </div>
   </div>
 
     <!-- Leaflet JS -->
@@ -241,351 +570,136 @@
         }).addTo(map);
 
         // Custom icon for kindergartens
-        const kindergartenIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34]
+        const kindergartenIcon = L.divIcon({
+            className: 'school-marker',
+            html: (school) => `
+                <div class="marker-container">
+                    <div class="marker-background">
+                        <div class="marker-icon">⭐</div>
+                        <div class="marker-text">${school.generalScore}</div>
+                    </div>
+                </div>
+            `,
+            iconSize: [60, 30],
+            iconAnchor: [30, 15],
+            popupAnchor: [0, -15]
         });
 
-        // Kindergarten locations data
-        const kindergartens = [
-            {
-                name: "Yunus Emre Anaokulu",
-                lat: 38.45453194,
-                lng: 27.11085367,
-                address: "https://maps.app.goo.gl/k6V12Fm8Sw1UUVs68",
-                phone: "0212 533 43 78",
-                teacherQuality: 4,
-                hygiene: 4,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 4.2,
-                googleMapsScore: 4.7
-            },
-            {
-                name: "Masal Treni Anaokulu",
-                lat: 41.02439602,
-                lng: 28.94366498,
-                address: "https://maps.app.goo.gl/7rGW19ux5EwxmkJ38",
-                phone: "0535 943 28 60",
-                teacherQuality: 1,
-                hygiene: 2,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 1,
-                generalScore: 1.8,
-                googleMapsScore: 3
-            },
-            {
-                name: "Çakıltaşı Anaokulu",
-                lat: 38.45454162,
-                lng: 27.11084803,
-                address: "https://maps.app.goo.gl/bk1Cmvhpm8dMWiiK7",
-                phone: "0212 589 17 25",
-                teacherQuality: 5,
-                hygiene: 3,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 3.8,
-                googleMapsScore: 4.7
-            },
-            {
-                name: "Gönül Bahçesi Anaokulu",
-                lat: 41.02816197,
-                lng: 28.9379032,
-                address: "https://maps.app.goo.gl/YctWgHcESgkjFxn28",
-                phone: "0212 533 37 37",
-                teacherQuality: 4,
-                hygiene: 4,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 4.3,
-                googleMapsScore: 4.6
-            },
-            {
-                name: "Merkez Gülleri Anaokulu",
-                lat: 41.01378857,
-                lng: 28.92283809,
-                address: "https://maps.app.goo.gl/2w4LJScv8pmAkib79",
-                phone: "0530 498 34 98",
-                teacherQuality: 2,
-                hygiene: 2,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 3,
-                generalScore: 2.5,
-                googleMapsScore: 5
-            },
-            {
-                name: "İrfan Kaşifler Anaokulu",
-                lat: 41.01422445,
-                lng: 28.9368667,
-                address: "https://maps.app.goo.gl/LrDseX3vP7CXsn7s8",
-                phone: "0532 422 27 34",
-                teacherQuality: 4,
-                hygiene: 3,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 2,
-                generalScore: 2.9,
-                googleMapsScore: 4.8
-            },
-            {
-                name: "Kocamustafapaşa Umut Eğitim Kurumu",
-                lat: 41.01657333,
-                lng: 28.94283995,
-                address: "https://maps.app.goo.gl/TMTG8tJTYoKWuHiX8",
-                phone: "0212 534 98 00",
-                teacherQuality: 2,
-                hygiene: 2,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 2,
-                generalScore: 2,
-                googleMapsScore: 4.8
-            },
-            {
-                name: "Topkapı Doğa Koleji Anaokulu",
-                lat: 41.01989388,
-                lng: 28.92964438,
-                address: "https://maps.app.goo.gl/5xL2xiajX3XBvE5J7",
-                phone: "0212 533 03 33",
-                teacherQuality: 3,
-                hygiene: 3,
-                specialNeeds: "Uygun değil",
-                schedule: "Yarım Gün",
-                security: 3,
-                generalScore: 3,
-                googleMapsScore: 3.6
-            },
-            {
-                name: "İELEV Anaokulu",
-                lat: 41.01296186,
-                lng: 28.97391568,
-                address: "https://maps.app.goo.gl/BTGRYazMsQuRMuYQA",
-                phone: "0212 512 78 87",
-                teacherQuality: 4,
-                hygiene: 4.5,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 5,
-                generalScore: 4.5,
-                googleMapsScore: 3.5
-            },
-            {
-                name: "Fatih İlkadım Anaokulu",
-                lat: 41.00951075,
-                lng: 28.93217520,
-                address: "https://maps.app.goo.gl/1ZutUUJxH61Unfw16",
-                phone: "0544 680 50 70",
-                teacherQuality: 5,
-                hygiene: 5,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 4.6,
-                googleMapsScore: 4.6
-            },
-            {
-                name: "Fatih Gülistanbul Anaokulu",
-                lat: 41.00132603,
-                lng: 28.92908120,
-                address: "https://maps.app.goo.gl/Qv6qMTXk6RykY6FL6",
-                phone: "0506 543 60 36",
-                teacherQuality: 5,
-                hygiene: 5,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 5,
-                generalScore: 4.7,
-                googleMapsScore: 5
-            },
-            {
-                name: "Sultan Fatih Koleji Anaokulu",
-                lat: 41.02792351,
-                lng: 28.94385232,
-                address: "https://maps.app.goo.gl/WAhbA3qWYFNzYVzS9",
-                phone: "0212 531 22 82",
-                teacherQuality: 3.5,
-                hygiene: 4,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 4.1,
-                googleMapsScore: 4
-            },
-            {
-                name: "Akasya Gece ve Gündüz Bakımevi",
-                lat: 41.00905024,
-                lng: 28.93419883,
-                address: "https://maps.app.goo.gl/Y2SjfwbTSVPJ9L9a7",
-                phone: "0212 585 85 13",
-                teacherQuality: 3.5,
-                hygiene: 4.5,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 3,
-                generalScore: 3.9,
-                googleMapsScore: 4.1
-            },
-            {
-                name: "Enerji Gönül Aydınlığı Anaokulu",
-                lat: 41.01644391,
-                lng: 28.94831918,
-                address: "https://maps.app.goo.gl/Fkmo5SZxX151jqo5A",
-                phone: "0530 861 82 52",
-                teacherQuality: 4,
-                hygiene: 4,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 5,
-                generalScore: 4.4,
-                googleMapsScore: 4.5
-            },
-            {
-                name: "Fatih Okyanus Koleji Anaokulu",
-                lat: 41.02790722,
-                lng: 28.93343535,
-                address: "https://maps.app.goo.gl/KH6b74jCSXx2kuAc8",
-                phone: "0212 521 19 99",
-                teacherQuality: 2,
-                hygiene: 3,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 3,
-                generalScore: 2.5,
-                googleMapsScore: 3.5
-            },
-            {
-                name: "Fatih Rawdah Okulları Anaokulu",
-                lat: 41.02603136,
-                lng: 28.93442709,
-                address: "https://maps.app.goo.gl/TEvELX5gsME8QRjQA",
-                phone: "0507 152 34 61",
-                teacherQuality: 3,
-                hygiene: 3,
-                specialNeeds: "Uygun değil",
-                schedule: "Yarım Gün",
-                security: 3,
-                generalScore: 3,
-                googleMapsScore: 3.7
-            },
-            {
-                name: "İpekböceği Anaokulu ve Kreş",
-                lat: 41.01333911,
-                lng: 28.94326334,
-                address: "https://maps.app.goo.gl/SFn5qWQndArkmw7b8",
-                phone: "0212 631 23 11",
-                teacherQuality: 4.5,
-                hygiene: 4.5,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 5,
-                generalScore: 4.6,
-                googleMapsScore: 4.8
-            },
-            {
-                name: "Miraç Çocuk Yuvası",
-                lat: 41.02512088,
-                lng: 28.95380611,
-                address: "https://maps.app.goo.gl/7zyfQa8KwRkhuu6P9",
-                phone: "0533 211 17 65",
-                teacherQuality: 3.5,
-                hygiene: 4,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 2,
-                generalScore: 3.6,
-                googleMapsScore: 4
-            },
-            {
-                name: "Benekli At Anaokulu",
-                lat: 41.01859369,
-                lng: 28.93186901,
-                address: "https://maps.app.goo.gl/J96ZB8rkEU4z7psB7",
-                phone: "0212 621 52 74",
-                teacherQuality: 3,
-                hygiene: 4,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 3.5,
-                googleMapsScore: 4.6
-            },
-            {
-                name: "İlk Cemre Anaokulu",
-                lat: 41.01834889,
-                lng: 28.93107271,
-                address: "https://maps.app.goo.gl/J96ZB8rkEU4z7psB7",
-                phone: "0212 963 20 73",
-                teacherQuality: 2,
-                hygiene: 3,
-                specialNeeds: "Uygun değil",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 2.4,
-                googleMapsScore: 4.6
-            },
-            {
-                name: "Fatih Sınav Koleji Anaokulu",
-                lat: 41.02317675,
-                lng: 28.92967970,
-                address: "https://maps.app.goo.gl/rv4YtunPr9QDTsxd9",
-                phone: "0212 588 44 72",
-                teacherQuality: 2,
-                hygiene: 3,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 3,
-                generalScore: 2.2,
-                googleMapsScore: 4.1
-            },
-            {
-                name: "İpekböceği Anaokulu",
-                lat: 41.01233829,
-                lng: 28.94331198,
-                address: "https://maps.app.goo.gl/diUP1qqMR1s2kgmT8",
-                phone: "0212 631 23 11",
-                teacherQuality: 5,
-                hygiene: 4,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 4,
-                generalScore: 4.1,
-                googleMapsScore: 4.8
-            },
-            {
-                name: "Fatih Altınbahçe Anaokulu",
-                lat: 41.02802584,
-                lng: 28.94525575,
-                address: "https://maps.app.goo.gl/45HivnBdgozp59Dv7",
-                phone: "0505 052 53 09",
-                teacherQuality: 4,
-                hygiene: 5,
-                specialNeeds: "Uygun",
-                schedule: "Tam Gün",
-                security: 5,
-                generalScore: 4,
-                googleMapsScore: 4.8
+        // Marker stili için CSS ekle
+        const markerStyle = document.createElement('style');
+        markerStyle.textContent = `
+            .marker-container {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-        ];
+            
+            .marker-background {
+                background: white;
+                border-radius: 15px;  /* Yuvarlak uçlar için */
+                padding: 4px 12px;    /* Yatay padding artırıldı */
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                display: flex;
+                flex-direction: row;  /* Yatay hizalama */
+                align-items: center;
+                justify-content: center;
+                gap: 4px;            /* İkon ve metin arası boşluk */
+                height: 24px;
+                transition: all 0.3s ease;
+            }
+            
+            .marker-icon {
+                font-size: 14px;
+                line-height: 1;
+            }
+            
+            .marker-text {
+                font-size: 12px;
+                font-weight: bold;
+                color: #FFA500;
+            }
 
-        // Center the map on Fatih district
+            .marker-background:hover {
+                transform: scale(1.1);
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            }
+        `;
+        document.head.appendChild(markerStyle);
+
+        // Marker array'ini ve aktif filtreyi global olarak tanımla
+        let markers = [];
+        let activeFilter = null;
+
+        // Filtreleme kriterleri
+        const filterCriteria = {
+            tamgun: school => school.schedule === "Tam Gün",
+            yarimgun: school => school.schedule === "Yarım Gün",
+            hijyen: school => school.hygiene >= 4,
+            guvenlik: school => school.security >= 4,
+            egitim: school => school.teacherQuality >= 4
+        };
+
         map.setView([41.0186, 28.9395], 14);
 
+        // Okulları haritaya ekle
+        kindergartens.forEach(school => {
+            const customIcon = L.divIcon({
+                className: 'school-marker',
+                html: `
+                    <div class="marker-container">
+                        <div class="marker-background">
+                            <div class="marker-icon">⭐</div>
+                            <div class="marker-text">${school.generalScore}</div>
+                        </div>
+                    </div>
+                `,
+                iconSize: [60, 30],
+                iconAnchor: [30, 15],
+                popupAnchor: [0, -15]
+            });
+
+            const marker = L.marker([school.lat, school.lng], {
+                icon: customIcon,
+                riseOnHover: true
+            }).addTo(map);
+            
+            marker.okulData = school;
+            markers.push(marker);
+            
+            marker.on('click', () => showSidebar(school));
+        });
+
+        // Sidebar fonksiyonları
         function showSidebar(school) {
             const sidebar = document.getElementById('sidebar');
-            const content = document.querySelector('.sidebar-content');
+            const detailsContainer = document.getElementById('school-details');
             
-            content.innerHTML = `
-                <h3>${school.name}</h3>
-                <img src="${school.image || 'placeholder.jpg'}" alt="${school.name}" onerror="this.src='placeholder.jpg'">
-                <p><strong>Adres:</strong> ${school.address}</p>
-                <p><strong>Telefon:</strong> ${school.phone}</p>
+            detailsContainer.innerHTML = `
+                <h2 class="school-title">${school.name}</h2>
+                <div class="detail-row">
+                    <span>⏰ Çalışma Saatleri</span>
+                    <strong>${school.schedule}</strong>
+                </div>
+                <div class="detail-row">
+                    <span>👩‍🏫 Eğitim Kalitesi</span>
+                    <strong>${school.teacherQuality}/5</strong>
+                </div>
+                <div class="detail-row">
+                    <span>🔒 Güvenlik</span>
+                    <strong>${school.security}/5</strong>
+                </div>
+                <div class="detail-row">
+                    <span>🧼 Hijyen</span>
+                    <strong>${school.hygiene}/5</strong>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query=${school.lat},${school.lng}" 
+                   class="maps-button" 
+                   target="_blank">
+                    <i class="fab fa-google"></i>
+                    Google Maps'te Gör
+                </a>
+                ${getWarningMessage(school.name)}
             `;
             
             sidebar.classList.add('active');
@@ -596,53 +710,7 @@
             sidebar.classList.remove('active');
         }
 
-        // Add markers and handle clicks
-        kindergartens.forEach(school => {
-            const marker = L.marker([school.lat, school.lng], {icon: kindergartenIcon}).addTo(map);
-            
-            const popupContent = `
-                <div style="min-width: 300px;">
-                    <h3 style="color: #FFA500; margin-bottom: 10px;">${school.name}</h3>
-                    <p><strong>Öğretmen Kalitesi:</strong> ${school.teacherQuality}/5</p>
-                    <p><strong>Hijyen:</strong> ${school.hygiene}/5</p>
-                    <p><strong>Özel Gereksinimli:</strong> ${school.specialNeeds}</p>
-                    <p><strong>Çalışma Saati:</strong> ${school.schedule}</p>
-                    <p><strong>Güvenlik:</strong> ${school.security}/5</p>
-                    <p><strong>Genel Puan:</strong> ${school.generalScore}/5</p>
-                    <p><strong>Google Puan:</strong> ${school.googleMapsScore}/5</p>
-                    <p><strong>Telefon:</strong> ${school.phone}</p>
-                    <a href="${school.address}" target="_blank">Google Haritalar'da Görüntüle</a>
-                    
-                    <div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 15px;">
-                        <h4 style="color: #FFA500; margin-bottom: 10px;">Değerlendirmenizi Yazın</h4>
-                        <textarea 
-                            placeholder="Bu anaokulu hakkında düşüncelerinizi paylaşın..." 
-                            style="width: 100%; 
-                            min-height: 80px; 
-                            margin-bottom: 10px; 
-                            padding: 8px;
-                            border: 1px solid #ddd;
-                            border-radius: 4px;
-                            resize: vertical;"
-                        ></textarea>
-                        <button 
-                            onclick="alert('Değerlendirmeniz için teşekkür ederiz!')"
-                            style="background: #FFA500;
-                            color: white;
-                            border: none;
-                            padding: 8px 15px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            width: 100%;"
-                        >Değerlendirme Gönder</button>
-                    </div>
-                </div>
-            `;
-            
-            marker.bindPopup(popupContent);
-        });
-
-        // Close sidebar when clicking on map
+        // Haritaya tıklandığında sidebar'ı kapat
         map.on('click', closeSidebar);
 
         // Add search control
@@ -669,8 +737,21 @@
             draggableWaypoints: false,
             lineOptions: {
                 styles: [{color: '#FFA500', weight: 4}]
-            }
+            },
+            createMarker: function() { return null; }, // Hide default markers
+            showAlternatives: false,
+            fitSelectedRoutes: false,
+            routeWhileDragging: false,
+            containerClassName: 'd-none' // Hide the instructions container
         }).addTo(map);
+
+        // Hide the routing container when it's added to the map
+        map.on('routingstart', function() {
+            const container = document.querySelector('.leaflet-routing-container');
+            if (container) {
+                container.style.display = 'none';
+            }
+        });
 
         // Function to calculate distance between two points
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -729,56 +810,87 @@
                     L.latLng(bestKindergarten.lat, bestKindergarten.lng)
                 ]);
 
-                // Create and show result popup with enhanced styling
-                const resultPopup = L.popup()
-                    .setLatLng([userLat, userLon])
-                    .setContent(`
-                        <div style="min-width: 280px; padding: 10px;">
-                            <div style="text-align: center; margin-bottom: 15px;">
-                                <h3 style="color: #FFA500; margin-bottom: 5px;">Size En Uygun Anaokulu</h3>
-                                <p style="color: #666; font-size: 0.9em;">Konumunuza en yakın ve en iyi puanlı</p>
+                // Instead of creating a popup, create a side panel
+                const sidePanelContent = `
+                    <div class="side-panel">
+                        <button class="close-btn" onclick="closeSidePanel()">&times;</button>
+                        
+                        <h3 style="color: #FFA500; margin-bottom: 20px; text-align: center;">
+                            Size En Uygun Anaokulu
+                        </h3>
+                        
+                        <div class="school-details">
+                            <h4 style="color: #333; margin-bottom: 15px;">${bestKindergarten.name}</h4>
+                            
+                            <div class="detail-row">
+                                <span>📍 Mesafe</span>
+                                <strong>${bestKindergarten.distance.toFixed(2)} km</strong>
                             </div>
                             
-                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                                <h4 style="color: #333; margin-bottom: 10px;">${bestKindergarten.name}</h4>
-                                
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                    <span style="color: #666;">📍 Mesafe:</span>
-                                    <strong>${bestKindergarten.distance.toFixed(2)} km</strong>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                    <span style="color: #666;">⭐ Genel Puan:</span>
-                                    <strong>${bestKindergarten.generalScore}/5</strong>
-                                </div>
-                                
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                                    <span style="color: #666;">📞 Telefon:</span>
-                                    <strong>${bestKindergarten.phone}</strong>
-                                </div>
+                            <div class="detail-row">
+                                <span>⭐ Genel Puan</span>
+                                <strong>${bestKindergarten.generalScore}/5</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>👩‍🏫 Öğretmen Kalitesi</span>
+                                <strong>${bestKindergarten.teacherQuality}/5</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>🧼 Hijyen</span>
+                                <strong>${bestKindergarten.hygiene}/5</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>🔒 Güvenlik</span>
+                                <strong>${bestKindergarten.security}/5</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>⏰ Çalışma Saati</span>
+                                <strong>${bestKindergarten.schedule}</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>♿ Özel Gereksinim</span>
+                                <strong>${bestKindergarten.specialNeeds}</strong>
+                            </div>
+                            
+                            <div class="detail-row">
+                                <span>📞 Telefon</span>
+                                <strong>${bestKindergarten.phone}</strong>
                             </div>
 
-                            <div style="text-align: center;">
-                                <a href="${bestKindergarten.address}" 
-                                   target="_blank"
-                                   style="display: inline-block;
-                                          background: #FFA500;
-                                          color: white;
-                                          padding: 8px 15px;
-                                          border-radius: 20px;
-                                          text-decoration: none;
-                                          font-weight: bold;
-                                          transition: all 0.3s ease;">
-                                    <span style="margin-right: 5px;">🗺️</span> Google Haritalar'da Görüntüle
-                                </a>
-                            </div>
-
-                            <div style="text-align: center; margin-top: 15px; font-size: 0.8em; color: #666;">
-                                <p>Mavi rota size en uygun yolu gösterir</p>
-                            </div>
+                            <a href="${bestKindergarten.address}" 
+                               target="_blank" 
+                               class="maps-button">
+                                🗺️ Google Haritalar'da Görüntüle
+                            </a>
                         </div>
-                    `)
-                    .openOn(map);
+
+                        <div style="text-align: center; margin-top: 20px; color: #666;">
+                            <p>Turuncu çizgi size en uygun yolu gösterir</p>
+                        </div>
+                    </div>
+                `;
+
+                // Remove existing side panel if any
+                const existingPanel = document.querySelector('.side-panel');
+                if (existingPanel) {
+                    existingPanel.remove();
+                }
+
+                // Add new side panel
+                document.body.insertAdjacentHTML('beforeend', sidePanelContent);
+                
+                // Show the panel
+                setTimeout(() => {
+                    document.querySelector('.side-panel').classList.add('active');
+                }, 100);
+
+                // Clear the input field
+                addressInput.value = '';
 
                 // Fit map bounds to show both points
                 map.fitBounds([
@@ -786,13 +898,135 @@
                     [bestKindergarten.lat, bestKindergarten.lng]
                 ], { padding: [50, 50] });
 
-                // Clear the input field
-                addressInput.value = '';
-
             } catch (error) {
                 console.error('Error:', error);
                 alert('Bir hata oluştu. Lütfen tekrar deneyin veya farklı bir adres girin.');
             }
+        }
+
+        // Add close function
+        function closeSidePanel() {
+            const panel = document.querySelector('.side-panel');
+            panel.classList.remove('active');
+            setTimeout(() => {
+                panel.remove();
+            }, 300);
+        }
+
+        // Filtreleme fonksiyonu
+        function applyFilters() {
+            const activeFilters = Array.from(document.querySelectorAll('.filter-btn.active'))
+                .map(btn => btn.dataset.filter);
+
+            markers.forEach(marker => {
+                const school = marker.okulData;
+                let shouldShow = true;
+
+                if (activeFilters.length > 0) {
+                    shouldShow = activeFilters.some(filter => 
+                        filterCriteria[filter](school)
+                    );
+                }
+
+                // Marker görünürlüğünü ayarla
+                marker.setOpacity(shouldShow ? 1 : 0.2);
+                marker.setZIndexOffset(shouldShow ? 1000 : -1000);
+            });
+
+            // Görünür markerlara zoom yap
+            if (activeFilters.length > 0) {
+                const visibleMarkers = markers.filter(m => m.getOpacity() === 1);
+                if (visibleMarkers.length > 0) {
+                    const bounds = L.featureGroup(visibleMarkers).getBounds();
+                    map.flyToBounds(bounds, { padding: [50, 50], duration: 0.5 });
+                }
+            } else {
+                map.setView([41.0186, 28.9395], 14);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Filtre butonlarına click event ekle
+            document.querySelectorAll('.filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Diğer butonların active class'ını kaldır
+                    document.querySelectorAll('.filter-btn').forEach(btn => {
+                        if (btn !== this) btn.classList.remove('active');
+                    });
+                    
+                    // Bu butonun active class'ını toggle et
+                    this.classList.toggle('active');
+                    
+                    // Filtreleri uygula
+                    applyFilters();
+                });
+            });
+        });
+
+        // Yıldız derecelendirme sistemi
+        let currentRating = 0;
+
+        function initializeRating() {
+            const stars = document.querySelectorAll('.stars i');
+            stars.forEach(star => {
+                star.addEventListener('mouseover', function() {
+                    const rating = this.dataset.rating;
+                    highlightStars(rating);
+                });
+
+                star.addEventListener('mouseout', function() {
+                    highlightStars(currentRating);
+                });
+
+                star.addEventListener('click', function() {
+                    currentRating = this.dataset.rating;
+                    highlightStars(currentRating);
+                });
+            });
+        }
+
+        function highlightStars(rating) {
+            document.querySelectorAll('.stars i').forEach(star => {
+                star.classList.toggle('active', star.dataset.rating <= rating);
+            });
+        }
+
+        // Yorum gönderme işlemi
+        document.querySelector('.submit-review')?.addEventListener('click', function() {
+            const reviewText = document.getElementById('reviewText').value;
+            if (currentRating === 0) {
+                alert('Lütfen bir puan verin');
+                return;
+            }
+            if (!reviewText.trim()) {
+                alert('Lütfen bir yorum yazın');
+                return;
+            }
+            
+            // Burada yorum gönderme API'si çağrılabilir
+            alert('Yorumunuz başarıyla gönderildi!');
+            document.getElementById('reviewText').value = '';
+            currentRating = 0;
+            highlightStars(0);
+        });
+
+        // Uyarı mesajı fonksiyonu
+        function getWarningMessage(schoolName) {
+            const warningSchools = [
+                "Akasya Gece ve Gündüz Bakımevi",
+                "Miraç Çocuk Anaokulu"
+            ];
+
+            if (warningSchools.includes(schoolName)) {
+                return `
+                    <div class="warning-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Çocuklara şiddet uygulandığı ile ilgili yorumlar bulunmaktadır.
+                    </div>
+                `;
+            }
+            return '';
         }
     </script>
 </body>
