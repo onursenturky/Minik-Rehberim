@@ -56,13 +56,6 @@ Minik Rehberim, Fatih ilçesindeki anaokullarını interaktif bir harita üzerin
 
 Bu proje [MIT](LICENSE) lisansı altında lisanslanmıştır.
 
-## 📞 İletişim
 
-- Proje Sahibi: [İsminiz]
-- E-posta: [E-posta adresiniz]
-- LinkedIn: [LinkedIn profiliniz]
-- Twitter: [Twitter profiliniz]
-
----
 
 ⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
