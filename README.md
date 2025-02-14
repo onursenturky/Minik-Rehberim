@@ -22,11 +22,11 @@ Minik Rehberim, Fatih ilçesindeki anaokullarını interaktif bir harita üzerin
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- ![HTML5]
-- ![CSS3]
-- ![JavaScript]
-- ![Bootstrap]
-- ![Leaflet]
+- HTML5
+- CSS3
+- JavaScript
+- Bootstrap
+- Leaflet
 
 ## 🚀 Nasıl Kullanılır?
 
