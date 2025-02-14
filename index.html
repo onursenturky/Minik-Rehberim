@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minik Rehberim</title>
+  
+  <!-- Fontlar -->
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"/>
+
+  <style>
+    /* Özel Stiller */
+    :root {
+      --turuncu: #ff8c00;
+      --acik-turuncu: #ffa239;
+      --beyaz: #FFF8F0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--beyaz);
+    }
+    .container{
+      margin-right: 0px;
+    }
+
+    .navbar {
+      background-color: var(--acik-turuncu) !important;
+      box-shadow: 0 2px 10px rgba(9, 9, 9, 0.1);
+    }
+
+    .navbar-brand {
+      font-family: 'Lobster', cursive;
+      font-size: 2rem;
+      color: var(--beyaz) !important;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .nav-link {
+      color: var(--beyaz) !important;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .nav-link:hover {
+      transform: scale(1.1);
+      color: var(--acik-turuncu) !important;
+    }
+
+    #map {
+      height: calc(100vh - 60px);
+      margin-top: 62px;
+    }
+
+    .leaflet-popup-content {
+      font-family: 'Roboto', sans-serif;
+      border-radius: 12px !important;
+    }
+
+    .leaflet-popup-content h3 {
+      font-family: 'Lobster', cursive;
+      color: var(--turuncu);
+      text-align: center;
+    }
+
+    .btn-custom {
+      background-color: var(--acik-turuncu);
+      color: var(--beyaz);
+      border-radius: 25px;
+      padding: 8px 25px;
+      border: none;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-custom:hover {
+      transform: scale(1.05);
+      background-color: var(--turuncu);
+    }
+
+    .form-control {
+      border-radius: 25px;
+      border: 2px solid var(--acik-turuncu);
+      font-size: 0.9rem;
+    }
+
+    .filter-btn {
+      background-color: transparent;
+      color: var(--beyaz);
+      border: 1px solid var(--beyaz);
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    .filter-btn:hover {
+      background-color: var(--beyaz);
+      color: var(--acik-turuncu);
+    }
+    .floating-controls {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .filter-bar {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: transparent !important;
+      backdrop-filter: blur(6px);
+      border-radius: 24px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border: 1px solid rgba(0,0,0,0.1);
+      max-width: 90%;
+      overflow-x: auto;
+      left: 390px;
+    }
+
+    .filter-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #5f6368 !important;
+      border: 1px solid rgba(0,0,0,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+      background: var(--turuncu) !important;
+      color: white !important;
+      border-color: transparent;
+      box-shadow: 0 2px 6px rgba(255, 140, 0, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigasyon -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Minik Rehberim</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Ana Sayfa</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Okullar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">İletişim</a>
+          </li>
+        </ul>
+        <form class="d-flex ms-3" onsubmit="event.preventDefault(); findBestKindergarten();">
+          <input class="form-control me-2" id="addressInput" type="search" placeholder="Adres Ara...">
+          <button class="btn btn-custom" type="submit">Ara</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div id="map"></div>
+  <div class="filter-bar">
+    <button class="filter-btn" data-filter="hijyen">🧼 Hijyen</button>
+    <button class="filter-btn" data-filter="egitim">👩🏫 Eğitim</button>
+    <button class="filter-btn" data-filter="trafik">🚦 Trafik</button>
+    <button class="filter-btn" data-filter="ozel">♿ Özel Gereksinim</button>
+    <button class="filter-btn" data-filter="yarimgun">⏳ Çalışma Saatleri</button>
+  </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // Initialize map centered on Fatih, Istanbul
+        const map = L.map('map').setView([41.0082, 28.9784], 14);
+
+        // Define different basemap layers
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        });
+
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '© Esri'
+        });
+
+        const streets = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        });
+
+        const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors, © CARTO'
+        });
+
+        // Define base maps object
+        const baseMaps = {
+            "OpenStreetMap": osm,
+            "Uydu Görüntüsü": satellite,
+            "Sokak Haritası": streets,
+            "Koyu Tema": dark
+        };
+
+        // Set default layer
+        osm.addTo(map);
+
+        // Add layer control to map
+        L.control.layers(baseMaps, null, {
+            position: 'topright'
+        }).addTo(map);
+
+        // Custom icon for kindergartens
+        const kindergartenIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+        });
+
+        // Kindergarten locations data
+        const kindergartens = [
+            {
+                name: "Yunus Emre Anaokulu",
+                lat: 38.45453194,
+                lng: 27.11085367,
+                address: "https://maps.app.goo.gl/k6V12Fm8Sw1UUVs68",
+                phone: "0212 533 43 78",
+                teacherQuality: 4,
+                hygiene: 4,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 4.2,
+                googleMapsScore: 4.7
+            },
+            {
+                name: "Masal Treni Anaokulu",
+                lat: 41.02439602,
+                lng: 28.94366498,
+                address: "https://maps.app.goo.gl/7rGW19ux5EwxmkJ38",
+                phone: "0535 943 28 60",
+                teacherQuality: 1,
+                hygiene: 2,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 1,
+                generalScore: 1.8,
+                googleMapsScore: 3
+            },
+            {
+                name: "Çakıltaşı Anaokulu",
+                lat: 38.45454162,
+                lng: 27.11084803,
+                address: "https://maps.app.goo.gl/bk1Cmvhpm8dMWiiK7",
+                phone: "0212 589 17 25",
+                teacherQuality: 5,
+                hygiene: 3,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 3.8,
+                googleMapsScore: 4.7
+            },
+            {
+                name: "Gönül Bahçesi Anaokulu",
+                lat: 41.02816197,
+                lng: 28.9379032,
+                address: "https://maps.app.goo.gl/YctWgHcESgkjFxn28",
+                phone: "0212 533 37 37",
+                teacherQuality: 4,
+                hygiene: 4,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 4.3,
+                googleMapsScore: 4.6
+            },
+            {
+                name: "Merkez Gülleri Anaokulu",
+                lat: 41.01378857,
+                lng: 28.92283809,
+                address: "https://maps.app.goo.gl/2w4LJScv8pmAkib79",
+                phone: "0530 498 34 98",
+                teacherQuality: 2,
+                hygiene: 2,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 3,
+                generalScore: 2.5,
+                googleMapsScore: 5
+            },
+            {
+                name: "İrfan Kaşifler Anaokulu",
+                lat: 41.01422445,
+                lng: 28.9368667,
+                address: "https://maps.app.goo.gl/LrDseX3vP7CXsn7s8",
+                phone: "0532 422 27 34",
+                teacherQuality: 4,
+                hygiene: 3,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 2,
+                generalScore: 2.9,
+                googleMapsScore: 4.8
+            },
+            {
+                name: "Kocamustafapaşa Umut Eğitim Kurumu",
+                lat: 41.01657333,
+                lng: 28.94283995,
+                address: "https://maps.app.goo.gl/TMTG8tJTYoKWuHiX8",
+                phone: "0212 534 98 00",
+                teacherQuality: 2,
+                hygiene: 2,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 2,
+                generalScore: 2,
+                googleMapsScore: 4.8
+            },
+            {
+                name: "Topkapı Doğa Koleji Anaokulu",
+                lat: 41.01989388,
+                lng: 28.92964438,
+                address: "https://maps.app.goo.gl/5xL2xiajX3XBvE5J7",
+                phone: "0212 533 03 33",
+                teacherQuality: 3,
+                hygiene: 3,
+                specialNeeds: "Uygun değil",
+                schedule: "Yarım Gün",
+                security: 3,
+                generalScore: 3,
+                googleMapsScore: 3.6
+            },
+            {
+                name: "İELEV Anaokulu",
+                lat: 41.01296186,
+                lng: 28.97391568,
+                address: "https://maps.app.goo.gl/BTGRYazMsQuRMuYQA",
+                phone: "0212 512 78 87",
+                teacherQuality: 4,
+                hygiene: 4.5,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 5,
+                generalScore: 4.5,
+                googleMapsScore: 3.5
+            },
+            {
+                name: "Fatih İlkadım Anaokulu",
+                lat: 41.00951075,
+                lng: 28.93217520,
+                address: "https://maps.app.goo.gl/1ZutUUJxH61Unfw16",
+                phone: "0544 680 50 70",
+                teacherQuality: 5,
+                hygiene: 5,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 4.6,
+                googleMapsScore: 4.6
+            },
+            {
+                name: "Fatih Gülistanbul Anaokulu",
+                lat: 41.00132603,
+                lng: 28.92908120,
+                address: "https://maps.app.goo.gl/Qv6qMTXk6RykY6FL6",
+                phone: "0506 543 60 36",
+                teacherQuality: 5,
+                hygiene: 5,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 5,
+                generalScore: 4.7,
+                googleMapsScore: 5
+            },
+            {
+                name: "Sultan Fatih Koleji Anaokulu",
+                lat: 41.02792351,
+                lng: 28.94385232,
+                address: "https://maps.app.goo.gl/WAhbA3qWYFNzYVzS9",
+                phone: "0212 531 22 82",
+                teacherQuality: 3.5,
+                hygiene: 4,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 4.1,
+                googleMapsScore: 4
+            },
+            {
+                name: "Akasya Gece ve Gündüz Bakımevi",
+                lat: 41.00905024,
+                lng: 28.93419883,
+                address: "https://maps.app.goo.gl/Y2SjfwbTSVPJ9L9a7",
+                phone: "0212 585 85 13",
+                teacherQuality: 3.5,
+                hygiene: 4.5,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 3,
+                generalScore: 3.9,
+                googleMapsScore: 4.1
+            },
+            {
+                name: "Enerji Gönül Aydınlığı Anaokulu",
+                lat: 41.01644391,
+                lng: 28.94831918,
+                address: "https://maps.app.goo.gl/Fkmo5SZxX151jqo5A",
+                phone: "0530 861 82 52",
+                teacherQuality: 4,
+                hygiene: 4,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 5,
+                generalScore: 4.4,
+                googleMapsScore: 4.5
+            },
+            {
+                name: "Fatih Okyanus Koleji Anaokulu",
+                lat: 41.02790722,
+                lng: 28.93343535,
+                address: "https://maps.app.goo.gl/KH6b74jCSXx2kuAc8",
+                phone: "0212 521 19 99",
+                teacherQuality: 2,
+                hygiene: 3,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 3,
+                generalScore: 2.5,
+                googleMapsScore: 3.5
+            },
+            {
+                name: "Fatih Rawdah Okulları Anaokulu",
+                lat: 41.02603136,
+                lng: 28.93442709,
+                address: "https://maps.app.goo.gl/TEvELX5gsME8QRjQA",
+                phone: "0507 152 34 61",
+                teacherQuality: 3,
+                hygiene: 3,
+                specialNeeds: "Uygun değil",
+                schedule: "Yarım Gün",
+                security: 3,
+                generalScore: 3,
+                googleMapsScore: 3.7
+            },
+            {
+                name: "İpekböceği Anaokulu ve Kreş",
+                lat: 41.01333911,
+                lng: 28.94326334,
+                address: "https://maps.app.goo.gl/SFn5qWQndArkmw7b8",
+                phone: "0212 631 23 11",
+                teacherQuality: 4.5,
+                hygiene: 4.5,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 5,
+                generalScore: 4.6,
+                googleMapsScore: 4.8
+            },
+            {
+                name: "Miraç Çocuk Yuvası",
+                lat: 41.02512088,
+                lng: 28.95380611,
+                address: "https://maps.app.goo.gl/7zyfQa8KwRkhuu6P9",
+                phone: "0533 211 17 65",
+                teacherQuality: 3.5,
+                hygiene: 4,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 2,
+                generalScore: 3.6,
+                googleMapsScore: 4
+            },
+            {
+                name: "Benekli At Anaokulu",
+                lat: 41.01859369,
+                lng: 28.93186901,
+                address: "https://maps.app.goo.gl/J96ZB8rkEU4z7psB7",
+                phone: "0212 621 52 74",
+                teacherQuality: 3,
+                hygiene: 4,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 3.5,
+                googleMapsScore: 4.6
+            },
+            {
+                name: "İlk Cemre Anaokulu",
+                lat: 41.01834889,
+                lng: 28.93107271,
+                address: "https://maps.app.goo.gl/J96ZB8rkEU4z7psB7",
+                phone: "0212 963 20 73",
+                teacherQuality: 2,
+                hygiene: 3,
+                specialNeeds: "Uygun değil",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 2.4,
+                googleMapsScore: 4.6
+            },
+            {
+                name: "Fatih Sınav Koleji Anaokulu",
+                lat: 41.02317675,
+                lng: 28.92967970,
+                address: "https://maps.app.goo.gl/rv4YtunPr9QDTsxd9",
+                phone: "0212 588 44 72",
+                teacherQuality: 2,
+                hygiene: 3,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 3,
+                generalScore: 2.2,
+                googleMapsScore: 4.1
+            },
+            {
+                name: "İpekböceği Anaokulu",
+                lat: 41.01233829,
+                lng: 28.94331198,
+                address: "https://maps.app.goo.gl/diUP1qqMR1s2kgmT8",
+                phone: "0212 631 23 11",
+                teacherQuality: 5,
+                hygiene: 4,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 4,
+                generalScore: 4.1,
+                googleMapsScore: 4.8
+            },
+            {
+                name: "Fatih Altınbahçe Anaokulu",
+                lat: 41.02802584,
+                lng: 28.94525575,
+                address: "https://maps.app.goo.gl/45HivnBdgozp59Dv7",
+                phone: "0505 052 53 09",
+                teacherQuality: 4,
+                hygiene: 5,
+                specialNeeds: "Uygun",
+                schedule: "Tam Gün",
+                security: 5,
+                generalScore: 4,
+                googleMapsScore: 4.8
+            }
+        ];
+
+        // Center the map on Fatih district
+        map.setView([41.0186, 28.9395], 14);
+
+        function showSidebar(school) {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.querySelector('.sidebar-content');
+            
+            content.innerHTML = `
+                <h3>${school.name}</h3>
+                <img src="${school.image || 'placeholder.jpg'}" alt="${school.name}" onerror="this.src='placeholder.jpg'">
+                <p><strong>Adres:</strong> ${school.address}</p>
+                <p><strong>Telefon:</strong> ${school.phone}</p>
+            `;
+            
+            sidebar.classList.add('active');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('active');
+        }
+
+        // Add markers and handle clicks
+        kindergartens.forEach(school => {
+            const marker = L.marker([school.lat, school.lng], {icon: kindergartenIcon}).addTo(map);
+            
+            const popupContent = `
+                <div style="min-width: 300px;">
+                    <h3 style="color: #FFA500; margin-bottom: 10px;">${school.name}</h3>
+                    <p><strong>Öğretmen Kalitesi:</strong> ${school.teacherQuality}/5</p>
+                    <p><strong>Hijyen:</strong> ${school.hygiene}/5</p>
+                    <p><strong>Özel Gereksinimli:</strong> ${school.specialNeeds}</p>
+                    <p><strong>Çalışma Saati:</strong> ${school.schedule}</p>
+                    <p><strong>Güvenlik:</strong> ${school.security}/5</p>
+                    <p><strong>Genel Puan:</strong> ${school.generalScore}/5</p>
+                    <p><strong>Google Puan:</strong> ${school.googleMapsScore}/5</p>
+                    <p><strong>Telefon:</strong> ${school.phone}</p>
+                    <a href="${school.address}" target="_blank">Google Haritalar'da Görüntüle</a>
+                    
+                    <div style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 15px;">
+                        <h4 style="color: #FFA500; margin-bottom: 10px;">Değerlendirmenizi Yazın</h4>
+                        <textarea 
+                            placeholder="Bu anaokulu hakkında düşüncelerinizi paylaşın..." 
+                            style="width: 100%; 
+                            min-height: 80px; 
+                            margin-bottom: 10px; 
+                            padding: 8px;
+                            border: 1px solid #ddd;
+                            border-radius: 4px;
+                            resize: vertical;"
+                        ></textarea>
+                        <button 
+                            onclick="alert('Değerlendirmeniz için teşekkür ederiz!')"
+                            style="background: #FFA500;
+                            color: white;
+                            border: none;
+                            padding: 8px 15px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            width: 100%;"
+                        >Değerlendirme Gönder</button>
+                    </div>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        });
+
+        // Close sidebar when clicking on map
+        map.on('click', closeSidebar);
+
+        // Add search control
+        const searchControl = L.Control.extend({
+            options: {
+                position: 'topleft'
+            },
+
+            onAdd: function (map) {
+                const container = L.DomUtil.create('div', 'search-container');
+                container.innerHTML = `
+
+                `;
+                return container;
+            }
+        });
+
+        map.addControl(new searchControl());
+
+        // Add routing control (initially hidden)
+        const routingControl = L.Routing.control({
+            show: false,
+            addWaypoints: false,
+            draggableWaypoints: false,
+            lineOptions: {
+                styles: [{color: '#FFA500', weight: 4}]
+            }
+        }).addTo(map);
+
+        // Function to calculate distance between two points
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in km
+        }
+
+        // Function to find best kindergarten
+        async function findBestKindergarten() {
+            const addressInput = document.getElementById('addressInput');
+            const address = addressInput.value;
+            
+            try {
+                // Show loading indicator
+                const loadingPopup = L.popup()
+                    .setLatLng(map.getCenter())
+                    .setContent('<div style="text-align: center;"><p>Arama yapılıyor...</p></div>')
+                    .openOn(map);
+
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ', Fatih, Istanbul, Turkey')}`);
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    alert('Adres bulunamadı. Lütfen Fatih ilçesi içinde bir adres girmeyi deneyin.');
+                    return;
+                }
+
+                const userLat = parseFloat(data[0].lat);
+                const userLon = parseFloat(data[0].lon);
+
+                // Calculate distances and sort kindergartens
+                const sortedKindergartens = kindergartens
+                    .map(k => ({
+                        ...k,
+                        distance: calculateDistance(userLat, userLon, k.lat, k.lng)
+                    }))
+                    .sort((a, b) => a.distance - b.distance);
+
+                // Get top 5 closest kindergartens
+                const closest5 = sortedKindergartens.slice(0, 5);
+                
+                // Find the best rated among the closest 5
+                const bestKindergarten = closest5.reduce((best, current) => 
+                    current.generalScore > best.generalScore ? current : best
+                , closest5[0]);
+
+                // Show route to the best kindergarten
+                routingControl.setWaypoints([
+                    L.latLng(userLat, userLon),
+                    L.latLng(bestKindergarten.lat, bestKindergarten.lng)
+                ]);
+
+                // Create and show result popup with enhanced styling
+                const resultPopup = L.popup()
+                    .setLatLng([userLat, userLon])
+                    .setContent(`
+                        <div style="min-width: 280px; padding: 10px;">
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <h3 style="color: #FFA500; margin-bottom: 5px;">Size En Uygun Anaokulu</h3>
+                                <p style="color: #666; font-size: 0.9em;">Konumunuza en yakın ve en iyi puanlı</p>
+                            </div>
+                            
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                                <h4 style="color: #333; margin-bottom: 10px;">${bestKindergarten.name}</h4>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #666;">📍 Mesafe:</span>
+                                    <strong>${bestKindergarten.distance.toFixed(2)} km</strong>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #666;">⭐ Genel Puan:</span>
+                                    <strong>${bestKindergarten.generalScore}/5</strong>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span style="color: #666;">📞 Telefon:</span>
+                                    <strong>${bestKindergarten.phone}</strong>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center;">
+                                <a href="${bestKindergarten.address}" 
+                                   target="_blank"
+                                   style="display: inline-block;
+                                          background: #FFA500;
+                                          color: white;
+                                          padding: 8px 15px;
+                                          border-radius: 20px;
+                                          text-decoration: none;
+                                          font-weight: bold;
+                                          transition: all 0.3s ease;">
+                                    <span style="margin-right: 5px;">🗺️</span> Google Haritalar'da Görüntüle
+                                </a>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 15px; font-size: 0.8em; color: #666;">
+                                <p>Mavi rota size en uygun yolu gösterir</p>
+                            </div>
+                        </div>
+                    `)
+                    .openOn(map);
+
+                // Fit map bounds to show both points
+                map.fitBounds([
+                    [userLat, userLon],
+                    [bestKindergarten.lat, bestKindergarten.lng]
+                ], { padding: [50, 50] });
+
+                // Clear the input field
+                addressInput.value = '';
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Bir hata oluştu. Lütfen tekrar deneyin veya farklı bir adres girin.');
+            }
+        }
+    </script>
+</body>
+</html>
